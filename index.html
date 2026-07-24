@@ -135,10 +135,13 @@
     <b>How this works:</b> weekly spreads are drawn from a two-state regime model — a "low spread" week and a "high spread" week, each with its own average and variability, switching according to fixed probabilities. On top of that, each simulated path also resamples its regime means from an estimated standard error (a simplified stand-in for a full block bootstrap), so the distribution reflects parameter uncertainty, not just week-to-week noise. This is a hand-built proxy for a proper Markov-switching model. Once 50–100 weeks of real official-vs-parallel rate data are collected, the regime means, variances, and transition probabilities will be estimated directly using <code>statsmodels.tsa.MarkovRegression</code>, and swapped in here without changing this interface.
   </p>
 
-  <footer>
-    <span>Fitsum Asegahegn · Statistics, Addis Ababa University</span>
-    <span><a href="https://fitsum-asegahegn.github.io/portfolio-website/">Portfolio</a> · <a href="https://github.com/fitsum-asegahegn">GitHub</a> · <a href="https://linkedin.com/in/fitsum-asegahegn">LinkedIn</a></span>
-  </footer>
+  <footer class="site-footer">
+  Fitsum Asegahegn · Statistics, Addis Ababa University ·
+  <a href="https://fitsum-asegahegn.github.io/portfolio-website/">Portfolio</a> ·
+  <a href="https://github.com/fitsum-asegahegn">GitHub</a> ·
+  <a href="https://linkedin.com/in/fitsum-asegahegn">LinkedIn</a> ·
+  <a href="docs/Forex_Divergence_Risk_Simulator.docx">Read the Paper</a>
+</footer>
 
 </div>
 
