@@ -1,10 +1,10 @@
 # Forex Divergence Risk Simulator
 
-**Estimate what the gap between the official NBE rate and the parallel market rate could cost your import business.**
+Estimate what the gap between the official NBE rate and the parallel market rate could cost your import business.
 
 ## About
 
-This tool implements the methodology described in my paper "Modeling Exchange Rate Divergence Risk in a Liberalized Forex Regime." It uses a two-state Markov switching model with Monte Carlo simulation to generate probabilistic loss distributions for Ethiopian importers.
+This tool implements the methodology described in my paper *"Modeling Exchange Rate Divergence Risk in a Liberalized Forex Regime"*. It uses a two-state Markov switching model with Monte Carlo simulation to generate probabilistic loss distributions for Ethiopian importers.
 
 ## How It Works
 
@@ -18,6 +18,21 @@ This tool implements the methodology described in my paper "Modeling Exchange Ra
 - Interactive simulator with instant results
 - One-click stress test for NBE policy shocks
 - Visual cost distribution comparison
+
+## Methodology
+
+This tool implements a two-state Markov switching model with Monte Carlo simulation:
+
+1. **Regime switching**: The spread between official and parallel rates moves between "low spread" and "high spread" regimes, each with its own mean and volatility, governed by a Markov transition matrix.
+
+2. **Monte Carlo simulation**: 5,000 future spread paths are generated over the forecast horizon, including parameter uncertainty via bootstrap-style resampling.
+
+3. **Blended cost calculation**: For each path, the tool computes the additional cost based on your parallel-market exposure: `V × (1-α) × s_t`.
+
+4. **Stress testing**: One-click scenarios (official devaluation, parallel crackdown) allow you to test tail-risk exposure.
+
+For the complete methodology, see the accompanying paper:  
+[Modeling Exchange Rate Divergence Risk in a Liberalized Forex Regime](docs/Forex_Divergence_Risk_Simulator.docx)
 
 ## Technology
 
