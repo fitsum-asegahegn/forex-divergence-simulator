@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Forex Divergence Risk Simulator — Fitsum Asegahegn</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/2.32.0/plotly.min.js"></script>
+</head>
+<body>
+
+<nav class="suite-nav">
+  <div class="suite-nav-inner">
+    <span class="suite-label">Applied Finance Suite</span>
+    <div class="suite-links">
+      <a href="https://fitsum-asegahegn.github.io/markowitz-calculator/">Markowitz Calculator</a>
+      <a href="https://fitsum-asegahegn.github.io/bootstrap-forecaster/">Bootstrap Forecaster</a>
+      <a href="#" class="active" aria-current="page">Forex Divergence Simulator</a>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow"><span class="dot"></span> Applied Finance Series · Tool 3 of 3</p>
+    <h1>Forex Divergence <span>Risk Simulator</span></h1>
+    <p class="sub">Estimate what the gap between the official NBE rate and the parallel market rate could cost an import-dependent business over the next 1–12 months — as a probability, not a guess.</p>
+    <p class="lineage"><b>Sequel to the thesis:</b> where the Markowitz model measured how a forex shock hits bank portfolio risk, this tool measures how the forex spread hits a single importer's bottom line. Methodology extends <i>Strategic Portfolio Optimization Under a Market-Based Forex Regime</i> (Asegahegn, 2026).</p>
+    <span class="demo-banner">⚠ Demo data — regime parameters are illustrative, not yet fitted to collected weekly rates</span>
+  </header>
+
+  <section class="reference-panel">
+    <span class="ref-label">Reference point (mid-2026, approximate)</span>
+    <div class="ref-values">
+      <span><b>Official rate</b> ≈ 160 Birr/USD</span>
+      <span class="ref-sep">·</span>
+      <span><b>Parallel rate</b> ≈ 178 Birr/USD</span>
+      <span class="ref-sep">·</span>
+      <span><b>Implied spread</b> ≈ 11%</span>
+    </div>
+    <p class="ref-note">The model's "low spread" regime centers near this reference point; "high spread" represents historically observed widening episodes (up to ~20%+).</p>
+  </section>
+
+  <section class="board" aria-live="polite">
+    <div class="board-row">
+      <span class="board-title">Simulation Readout</span>
+      <span class="regime-pill" id="regimePill">Awaiting input</span>
+    </div>
+    <div class="digits-grid">
+      <div class="digit-cell">
+        <span class="digit-label">P(cost exceeds threshold)</span>
+        <span class="digit-value" id="digitProb">— <span class="unit">%</span></span>
+        <span class="delta-badge" id="deltaProb"></span>
+      </div>
+      <div class="digit-cell">
+        <span class="digit-label">Median extra cost</span>
+        <span class="digit-value" id="digitMedian">—</span>
+        <span class="delta-badge" id="deltaMedian"></span>
+      </div>
+      <div class="digit-cell">
+        <span class="digit-label">Worst case (95th pct)</span>
+        <span class="digit-value" id="digitWorst">—</span>
+        <span class="delta-badge" id="deltaWorst"></span>
+      </div>
+    </div>
+    <div class="narrative" id="narrative">Run a simulation to see your exposure translated into plain language.</div>
+  </section>
+
+  <section class="teller">
+    <h2>Your Exposure</h2>
+    <p class="hint">Fill in your import profile. Nothing here is stored or sent anywhere — it runs entirely in your browser.</p>
+    <div class="field-grid">
+      <div class="field">
+        <label for="importVolume">Monthly import volume</label>
+        <input type="number" id="importVolume" value="2000000" min="0" step="10000">
+        <p class="suffix">Birr per month, at official rate value</p>
+      </div>
+      <div class="field">
+        <label for="pctParallel">Share you buy in the parallel market</label>
+        <input type="number" id="pctParallel" value="35" min="0" max="100" step="1">
+        <p class="suffix">% of volume you can't clear through official channels</p>
+      </div>
+      <div class="field">
+        <label for="horizon">Forecast horizon</label>
+        <select id="horizon">
+          <option value="1">1 month</option>
+          <option value="3" selected>3 months</option>
+          <option value="6">6 months</option>
+          <option value="12">12 months</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="threshold">Loss threshold you care about</label>
+        <input type="number" id="threshold" value="150000" min="0" step="5000">
+        <p class="suffix">Birr — the tool reports P(extra cost exceeds this)</p>
+      </div>
+    </div>
+
+    <fieldset class="shock-select">
+      <legend>Shock scenario (for the stress test below)</legend>
+      <label class="radio-row">
+        <input type="radio" name="shockType" value="devaluation" checked>
+        <span><b>Official devaluation</b> — official rate moves toward parallel, spread compresses</span>
+      </label>
+      <label class="radio-row">
+        <input type="radio" name="shockType" value="crackdown">
+        <span><b>Parallel crackdown</b> — access tightens, spread widens sharply</span>
+      </label>
+    </fieldset>
+
+    <div class="actions">
+      <button class="btn-run" id="runBtn">Run Simulation</button>
+      <button class="btn-shock" id="shockBtn" disabled><span class="lever"></span> Trigger Shock</button>
+      <button class="btn-reset" id="resetBtn">Reset</button>
+    </div>
+  </section>
+
+  <section class="chart-panel">
+    <h2>Extra Cost Distribution</h2>
+    <p class="hint">5,000 simulated futures, including parameter uncertainty (bootstrap-style resampling around the estimated regime means). Amber is your baseline. Trigger a shock to overlay the selected scenario in red.</p>
+    <div id="chart"></div>
+    <div class="placeholder" id="chartPlaceholder">Distribution will render here once you run a simulation.</div>
+  </section>
+
+  <details class="fan-panel">
+    <summary>Show weekly spread fan chart</summary>
+    <p class="hint">The band of plausible weekly spreads over your forecast horizon — the shaded region narrows where the model is confident, widens where regime uncertainty dominates.</p>
+    <div id="fanChart"></div>
+  </details>
+
+  <p class="model-note">
+    <b>How this works:</b> weekly spreads are drawn from a two-state regime model — a "low spread" week and a "high spread" week, each with its own average and variability, switching according to fixed probabilities. On top of that, each simulated path also resamples its regime means from an estimated standard error (a simplified stand-in for a full block bootstrap), so the distribution reflects parameter uncertainty, not just week-to-week noise. This is a hand-built proxy for a proper Markov-switching model. Once 50–100 weeks of real official-vs-parallel rate data are collected, the regime means, variances, and transition probabilities will be estimated directly using <code>statsmodels.tsa.MarkovRegression</code>, and swapped in here without changing this interface.
+  </p>
+
+  <footer>
+    <span>Fitsum Asegahegn · Statistics, Addis Ababa University</span>
+    <span><a href="https://fitsum-asegahegn.github.io/portfolio-website/">Portfolio</a> · <a href="https://github.com/fitsum-asegahegn">GitHub</a> · <a href="https://linkedin.com/in/fitsum-asegahegn">LinkedIn</a></span>
+  </footer>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
